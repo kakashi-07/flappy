@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Flappy Love for Nishkala 💘</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #2b234d 0, #070818 60%);
+    color: #fefbff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+  }
+  .wrap {
+    width: 200%;
+    max-width: 470px;
+  }
+  .top-text {
+    text-align: center;
+    margin-bottom: 18px;
+    font-size: 14px;
+    opacity: 0.85;
+  }
+  .top-text span {
+    font-weight: 600;
+    background: linear-gradient(120deg, #ff9ac5, #ffd29b);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .game-card {
+    position: relative;
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 14px;
+    background: linear-gradient(to bottom, #6da0ff, #1c244a);
+    touch-action: manipulation;
+  }
+  .score {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 2px 6px #000;
+  }
+  .hint {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 11px;
+    text-align: right;
+    opacity: 0.85;
+  }
+  .hint span {
+    font-weight: 600;
+  }
+
+  .overlay {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at top, rgba(10,7,25,0.98), rgba(2,2,6,0.98));
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+    padding: 40px;
+    text-align: center;
+    overflow-y: auto;
+  }
+  .overlay.visible {
+    opacity: 1; pointer-events: auto;
+  }
+  .overlay-card {
+    max-width: 340px;
+  }
+  .overlay-title {
+    font-size: 20px;
+    margin-bottom: 10px;
+    background: linear-gradient(120deg, #ffb8e6, #ffd29b);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .overlay-text {
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  .overlay-text b {
+    background: linear-gradient(120deg, #ff9ac5, #ffd29b);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  .btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff8bb3, #ffb768);
+    color: #1e1025;
+    box-shadow: 0 12px 26px rgba(0,0,0,0.9);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+  }
+  .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.92);
+    filter: brightness(1.03);
+  }
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.92);
+    filter: brightness(0.97);
+  }
+  .small-note {
+    margin-top: 6px;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top-text">
+    Help the little heart fly through the gaps.<br />
+    Reach <span>10</span> and it’ll finally say what I always feel.
+  </div>
+
+  <div class="game-card">
+    <canvas id="game" width="360" height="480"></canvas>
+    <div class="score" id="score">0</div>
+    <div class="hint">
+      <span>Tap</span> (mobile) / click / Space (PC)<br />to keep the heart flying.
+    </div>
+
+    <div class="overlay" id="overlay">
+      <div class="overlay-card">
+        <div class="overlay-title">You made it to 21. 💘</div>
+        <div class="overlay-text">
+          You patiently guided this tiny heart through every little obstacle on the screen…<br/>
+          That’s literally what you do to my real heart too, <b>Khaleshi Aurath</b>.<br/>
+          Somewhere between your random replies, your overthinking, your cute reactions and your rare but pure smiles,<br/>
+          you quietly became my favourite part of every day.<br/><br/>
+          Just like how the bird crosses all the obstacles and the Ups and downs i believe u too cross all the 
+          Ups and downs in ur life and reach ur goal and bring back ur pretty smile and charm.  <br/>
+          I really, genuinely adore you — more than this small game or any screen can explain.<br/><br/>
+          And if you ever feel like life is a bit heavy, I hope you remember this one thing:<br/>
+          there’s someone out here who keeps choosing you, over and over, without any scoreboard needed.<br/><br/>
+          That someone is me 😉🤣.
+        
+        </div>
+        <button class="btn" id="restartBtn">Play Again</button>
+        <div class="small-note">(Also, you look really cute when you’re concentrating this hard.)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Soft BGM (put music.mp3 in same folder) -->
+<audio id="bgm" src=" https://www.dropbox.com/scl/fi/z88p03krxn44a1rfarl1p/her.mp3?rlkey=ai93y2bnqj0nu86qtobi6v143&st=9js0jnfg&raw=1" loop preload="auto"></audio>
+
+<script>
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  const scoreEl = document.getElementById("score");
+  const overlay = document.getElementById("overlay");
+  const restartBtn = document.getElementById("restartBtn");
+  const bgm = document.getElementById("bgm");
+
+  let bird, pipes, score, gameOver, started, messageShown;
+  let particles = [];
+  let bgmStarted = false;
+
+  // Smooth, mobile-friendly physics
+  const gravity = 0.18;
+  const jumpStrength = -4.2;
+  const pipeGap = 125;
+  const pipeSpeed = 1.4;
+  const pipeWidth = 60;
+  const spacing = 230;
+  const targetScore = 10;
+
+  function resetGame() {
+    bird = { x: 110, y: 160, r: 14, vy: 0 };
+    pipes = [];
+    particles = [];
+    score = 0;
+    gameOver = false;
+    started = false;
+    messageShown = false;
+    overlay.classList.remove("visible");
+    scoreEl.textContent = "0";
+
+    for (let i = 0; i < 3; i++) addPipe(canvas.width + i * spacing);
+  }
+
+  function addPipe(x) {
+    const min = 40;
+    const max = canvas.height - pipeGap - 80;
+    const top = Math.random() * (max - min) + min;
+
+    pipes.push({
+      x,
+      w: pipeWidth,
+      top,
+      bottom: top + pipeGap,
+      passed: false
+    });
+  }
+
+  function flap() {
+    if (!started) started = true;
+
+    // Start BGM on first user interaction (required by mobile browsers)
+    if (!bgmStarted) {
+      bgmStarted = true;
+      bgm.volume = 0.5;
+      bgm.play().catch(() => {
+        // ignore if it fails, user can interact again
+      });
+    }
+
+    if (!gameOver) {
+      bird.vy = jumpStrength;
+      createHeartParticles();
+    } else if (messageShown) {
+      // do nothing, overlay has restart button
+    } else {
+      resetGame();
+    }
+  }
+
+  function createHeartParticles() {
+    // create 5 small hearts behind the bird
+    for (let i = 0; i < 5; i++) {
+      particles.push({
+        x: bird.x - 4 + (Math.random() * 8 - 4),
+        y: bird.y + (Math.random() * 8 - 4),
+        size: Math.random() * 4 + 3,
+        alpha: 1,
+        life: 0
+      });
+    }
+  }
+
+  function updateParticles() {
+    for (let p of particles) {
+      p.life += 0.04;
+      p.y += 0.2;      // drift down slightly
+      p.x -= 0.4;      // drift left
+      p.alpha = Math.max(0, 1 - p.life);
+    }
+    particles = particles.filter(p => p.alpha > 0.05);
+  }
+
+  function update() {
+    if (!started || gameOver) return;
+
+    bird.vy += gravity;
+    bird.y += bird.vy;
+
+    if (bird.y + bird.r >= canvas.height) gameOver = true;
+    if (bird.y - bird.r <= 0) bird.y = bird.r;
+
+    pipes.forEach(pipe => {
+      pipe.x -= pipeSpeed;
+
+      if (!pipe.passed && pipe.x + pipe.w < bird.x) {
+        pipe.passed = true;
+        score++;
+        scoreEl.textContent = score;
+
+        if (score >= targetScore && !messageShown) {
+          messageShown = true;
+          gameOver = true;
+          overlay.classList.add("visible");
+        }
+      }
+    });
+
+    if (pipes[0].x + pipes[0].w < 0) {
+      pipes.shift();
+      addPipe(pipes[pipes.length - 1].x + spacing);
+    }
+
+    for (let pipe of pipes) {
+      if (
+        bird.x + bird.r > pipe.x &&
+        bird.x - bird.r < pipe.x + pipe.w &&
+        (bird.y - bird.r < pipe.top ||
+         bird.y + bird.r > pipe.bottom)
+      ) {
+        gameOver = true;
+      }
+    }
+
+    updateParticles();
+  }
+
+  function drawBackground() {
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.17)";
+    ctx.beginPath();
+    ctx.arc(70, 60, 26, 0, Math.PI * 2);
+    ctx.arc(100, 60, 18, 0, Math.PI * 2);
+    ctx.arc(130, 60, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(260, 90, 20, 0, Math.PI * 2);
+    ctx.arc(285, 90, 15, 0, Math.PI * 2);
+    ctx.arc(310, 90, 19, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawPipes() {
+    for (let pipe of pipes) {
+      ctx.fillStyle = "#1b2140";
+      ctx.fillRect(pipe.x, 0, pipe.w, pipe.top);
+      ctx.fillRect(pipe.x, pipe.bottom, pipe.w, canvas.height - pipe.bottom);
+
+      ctx.fillStyle = "#14182f";
+      ctx.fillRect(pipe.x - 2, pipe.top - 10, pipe.w + 4, 10);
+      ctx.fillRect(pipe.x - 2, pipe.bottom, pipe.w + 4, 10);
+    }
+  }
+
+  function drawGround() {
+    ctx.fillStyle = "#18152c";
+    ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+    ctx.fillStyle = "#24213b";
+    for (let i = 0; i < canvas.width; i += 20) {
+      ctx.fillRect(i, canvas.height - 40, 10, 40);
+    }
+  }
+
+  function drawParticles() {
+    for (let p of particles) {
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = "#ff8bb3";
+
+      const s = p.size;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.bezierCurveTo(
+        p.x - s, p.y - s,
+        p.x - s * 1.4, p.y + s * 0.3,
+        p.x, p.y + s
+      );
+      ctx.bezierCurveTo(
+        p.x + s * 1.4, p.y + s * 0.3,
+        p.x + s, p.y - s,
+        p.x, p.y
+      );
+
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  function drawBird() {
+    const { x, y, r } = bird;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(255,150,180,0.9)";
+    ctx.shadowBlur = 15;
+
+    ctx.beginPath();
+    const s = r;
+    ctx.moveTo(x, y);
+    ctx.bezierCurveTo(x - s, y - s, x - s * 1.4, y + s * 0.3, x, y + s);
+    ctx.bezierCurveTo(x + s * 1.4, y + s * 0.3, x + s, y - s, x, y);
+
+    ctx.fillStyle = "#ff8bb3";
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBackground();
+    drawPipes();
+    drawGround();
+    drawParticles();
+    drawBird();
+
+    update();
+    requestAnimationFrame(loop);
+  }
+
+  function handleKey(e) {
+    if (e.code === "Space") {
+      e.preventDefault();
+      flap();
+    }
+  }
+
+  function handleClick() {
+    flap();
+  }
+
+  canvas.addEventListener("click", handleClick);
+  window.addEventListener("keydown", handleKey);
+
+  canvas.addEventListener("touchend", e => {
+    e.preventDefault();
+    flap();
+  }, { passive: false });
+
+  restartBtn.addEventListener("click", () => {
+    resetGame();
+  });
+
+  resetGame();
+  loop();
+</script>
+</body>
+</html>
